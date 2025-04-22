@@ -10,5 +10,6 @@ pulumi_aws==6.77.1
 pulumi_awsx==2.21.1
 pulumi_docker==4.6.2
 pulumi_docker_build==0.0.11
+pulumi_policy==1.14.0
 PyYAML==6.0.2
 semver==3.0.4
