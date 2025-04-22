@@ -58,13 +58,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r infra/requirements.txt
       
-      - name: Install Pulumi
-        run: |
-          curl -fsSL https://get.pulumi.com | sh
-          echo "$HOME/.pulumi/bin" >> $GITHUB_PATH
-          echo "$HOME/.pulumi/bin" >> $GITHUB_ENV
-          pulumi version
-      
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
