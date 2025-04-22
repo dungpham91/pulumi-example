@@ -22,6 +22,9 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   AWS_DEFAULT_REGION: ap-southeast-1
+  STACK_NAME: dev
+  PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+  S3_BUCKET: devopslite-dev-infra-state-bucket
 
 jobs:
   checkov:
@@ -67,19 +70,24 @@ jobs:
 
       - name: Pulumi Login
         run: |
-          pulumi login s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+          pulumi login s3://${{ env.S3_BUCKET }}?region=${{ env.AWS_REGION }}
       
       - name: Pulumi Stack
         run: |
           cd infra
-          pulumi stack select dev || pulumi stack init dev --secrets-provider="passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
+          if pulumi stack select "$STACK_NAME"; then
+            echo "Stack $STACK_NAME exists and selected."
+          else
+            echo "Stack $STACK_NAME does not exist. Creating it..."
+            pulumi stack init "$STACK_NAME"
+          fi
 
       - name: Pulumi Preview Changes
         run: |
           cd infra
-          pulumi preview --stack dev --color always --secrets-provider "passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
+          pulumi preview --stack ${{ env.STACK_NAME }} --color always
       
       - name: Update Pulumi stack
         run: |
           cd infra
-          pulumi up --stack dev --yes --color always --secrets-provider "passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
+          pulumi up --stack ${{ env.STACK_NAME }} --yes --color always
