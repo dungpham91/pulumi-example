@@ -20,11 +20,8 @@ on:
   workflow_dispatch:
 
 env:
-  PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
   AWS_REGION: ap-southeast-1
   AWS_DEFAULT_REGION: ap-southeast-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   checkov:
@@ -61,24 +58,35 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r infra/requirements.txt
       
-      - name: Preview Pulumi changes
-        uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
+      - name: Install Pulumi
+        run: |
+          curl -fsSL https://get.pulumi.com | sh
+          echo "$HOME/.pulumi/bin" >> $GITHUB_PATH
+          echo "$HOME/.pulumi/bin" >> $GITHUB_ENV
+          pulumi version
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
-          command: preview
-          stack-name: dev
-          work-dir: infra
-          color: always
-          pulumi-version: latest
-          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
-          secrets-provider: passphrase
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Pulumi Login
+        run: |
+          pulumi login s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+      
+      - name: Pulumi Stack
+        run: |
+          cd infra
+          pulumi stack select dev || pulumi stack init dev --secrets-provider="passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
+
+      - name: Pulumi Preview Changes
+        run: |
+          cd infra
+          pulumi preview --stack dev --color always --secrets-provider "passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
       
       - name: Update Pulumi stack
-        uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
-        with:
-          command: up --yes
-          stack-name: dev
-          work-dir: infra
-          color: always
-          pulumi-version: latest
-          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
-          secrets-provider: passphrase
+        run: |
+          cd infra
+          pulumi up --stack dev --yes --color always --secrets-provider "passphrase://${{ secrets.PULUMI_CONFIG_PASSPHRASE }}"
