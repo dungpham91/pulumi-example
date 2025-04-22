@@ -32,7 +32,9 @@ jobs:
         uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
         with:
           command: destroy
-          stack-name: devopslite/dev
+          stack-name: dev
           work-dir: infra
           color: always
           pulumi-version: latest
+          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+          secrets-provider: passphrase

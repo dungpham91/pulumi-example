@@ -8,6 +8,7 @@ on:
       - '.github/**'
       - 'README.md'
       - 'images/**'
+      - 'backend-setup/**'
   pull_request:
     branches:
       - main
@@ -15,6 +16,7 @@ on:
       - '.github/**'
       - 'README.md'
       - 'images/**'
+      - 'backend-setup/**'
   workflow_dispatch:
 
 env:
@@ -64,16 +66,20 @@ jobs:
         uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
         with:
           command: preview
-          stack-name: devopslite/dev
+          stack-name: dev
           work-dir: infra
           color: always
           pulumi-version: latest
+          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+          secrets-provider: passphrase
       
       - name: Update Pulumi stack
         uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
         with:
           command: up --yes
-          stack-name: devopslite/dev
+          stack-name: dev
           work-dir: infra
           color: always
           pulumi-version: latest
+          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+          secrets-provider: passphrase

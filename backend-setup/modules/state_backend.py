@@ -10,6 +10,7 @@ class StateBackend(pulumi.ComponentResource):
         # S3 bucket will be created with unique name based on stack name and environment
         self.state_bucket = aws.s3.Bucket(f"{name}-bucket",
             bucket=config.state_bucket_name,
+            force_destroy=True,
             acl="private",
             versioning=aws.s3.BucketVersioningArgs(
                 enabled=True,
