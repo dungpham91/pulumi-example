@@ -1,0 +1,4 @@
+skip-path:
+  - .github
+  - .venv
+  - venv

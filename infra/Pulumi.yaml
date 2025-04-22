@@ -1,0 +1,12 @@
+# infra/Pulumi.yaml
+name: pulumi-example
+runtime: python
+description: A Python Pulumi program to deploy AWS infrastructure (VPC, EC2 with Nginx)
+backend:
+  # Specify the backend as S3. Pulumi will find the bucket from the login configuration.
+  # The full URL will be s3://<your-bucket-name>
+  # Pulumi will also automatically detect the DynamoDB table if it follows the convention.
+  url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
+lock:
+  region: ap-southeast-1
+  table: devopslite-dev-pulumi-state-lock

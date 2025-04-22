@@ -1,0 +1,8 @@
+# infra/Pulumi.prod.yaml
+config:
+  aws:region: ap-southeast-1
+  pulumi-example:projectName: devopslite
+  pulumi-example:environmentName: prod
+  pulumi-example:allowedSshIp: 118.70.202.192
+  pulumi-example:instanceType: t3.medium
+  pulumi-example:vpcCidrBlock: 172.10.0.0/16
