@@ -30,10 +30,22 @@ def create_web_security_group(name: str, vpc_id: pulumi.Input[str]):
                 description="Allow HTTPS traffic",
             ),
             aws.ec2.SecurityGroupIngressArgs(
+                # Create a for port 8080 to test policy pack
+                # This rule should be blocked by the policy pack
+                protocol="tcp",
+                from_port=8080,
+                to_port=8080,
+                cidr_blocks=["0.0.0.0/0"],
+                description="Allow 8080 traffic",
+            ),
+            aws.ec2.SecurityGroupIngressArgs(
+                # Allow SSH from internet to test policy pack
+                # This rule should be blocked by the policy pack
                 protocol="tcp",
                 from_port=22,
                 to_port=22,
-                cidr_blocks=[f"{config.allowed_ssh_ip}/32"], # Only allow from configured IP
+                cidr_blocks=["0.0.0.0/0"],
+                #cidr_blocks=[f"{config.allowed_ssh_ip}/32"], # Only allow from configured IP
                 description="Allow SSH traffic from specific IP",
             ),
         ],

@@ -10,7 +10,8 @@ def create_vpc(name: str):
     """
     vpc = awsx.ec2.Vpc(name,
         cidr_block=config.vpc_cidr_block,
-        number_of_availability_zones=2,
+        # Use 1 AZ to test policy pack
+        number_of_availability_zones=1,
         # Add explicit subnet strategy
         subnet_strategy=awsx.ec2.SubnetAllocationStrategy.AUTO,
         subnet_specs=[
