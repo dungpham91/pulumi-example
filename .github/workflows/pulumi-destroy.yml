@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
 
 env:
-  PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
   AWS_REGION: ap-southeast-1
   AWS_DEFAULT_REGION: ap-southeast-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  STACK_NAME: dev
+  PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+  S3_BUCKET: devopslite-dev-infra-state-bucket
 
 jobs:
   pulumi:
@@ -28,13 +28,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r infra/requirements.txt
       
-      - name: Preview Pulumi changes
-        uses: pulumi/actions@9519177da243fd32cab35cdbf19cce1ab7472fcc # v6.2.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
-          command: destroy
-          stack-name: dev
-          work-dir: infra
-          color: always
-          pulumi-version: latest
-          cloud-url: s3://devopslite-dev-infra-state-bucket?region=ap-southeast-1
-          secrets-provider: passphrase
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Pulumi Login
+        run: |
+          pulumi login s3://${{ env.S3_BUCKET }}?region=${{ env.AWS_REGION }}
+      
+      - name: Pulumi Stack
+        run: |
+          cd infra
+          pulumi stack select "$STACK_NAME"
+      
+      - name: Update Pulumi stack
+        run: |
+          cd infra
+          pulumi destroy --stack ${{ env.STACK_NAME }} --yes --color always
